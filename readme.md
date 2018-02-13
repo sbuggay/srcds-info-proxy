@@ -1,4 +1,6 @@
-# srcds-info-proxy [![npm version](https://badge.fury.io/js/srcds-info-proxy.svg)](https://badge.fury.io/js/srcds-info-proxy)
+# srcds-info-proxy
+
+[![npm version](https://badge.fury.io/js/srcds-info-proxy.svg)](https://badge.fury.io/js/srcds-info-proxy)
 
 srcds-info-proxy is a server to proxy [A2S_INFO](https://developer.valvesoftware.com/wiki/Server_queries#A2S_INFO) server queries through a REST endpoint.
 
