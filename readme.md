@@ -1,4 +1,4 @@
-#srcds-info-proxy
+# srcds-info-proxy
 
 srcds-info-proxy is a server to proxy [A2S_INFO](https://developer.valvesoftware.com/wiki/Server_queries#A2S_INFO) server queries through a REST endpoint.
 
@@ -20,23 +20,23 @@ Now you can make a request to like this:
 
 If the provided ip and port are a valid RCON supported server, you should get back a response like this:
 
-```
-type	"I"
-version	17
-serverName	"LinuxGSM"
-map	"de_mirage"
-gameType	"csgo"
-gameName	"Counter-Strike: Global Offensive"
-appID	730
-numPlayers	0
-maxPlayers	16
-numBots	0
-dedicated	"dedicated"
-os	"Linux"
-password	0
-secure	true
-gameVersion	"1.36.2.6"
-ip	"192.168.1.3"
-port	27015
-pw	false
-```
+key | value
+--- | ---
+type | "I"
+version | 17
+serverName | "LinuxGSM"
+map | "de_mirage"
+gameType | "csgo"
+gameName | "Counter-Strike: Global Offensive"
+appID | 730
+numPlayers | 0
+maxPlayers | 16
+numBots | 0
+dedicated | "dedicated"
+os | "Linux"
+password | 0
+secure | true
+gameVersion | "1.36.2.6"
+ip | "192.168.1.3"
+port | 27015
+pw | false
