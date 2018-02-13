@@ -1,0 +1,17 @@
+{
+  "name": "rcon-proxy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "node-restify": "^0.2.1",
+    "restify": "^6.3.4",
+    "srcds-info": "^0.1.1",
+    "srcds-rcon": "^2.2.1"
+  }
+}
