@@ -10,8 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "node-restify": "^0.2.1",
-    "restify": "^6.3.4",
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
     "srcds-info": "^0.1.1"
   }
 }

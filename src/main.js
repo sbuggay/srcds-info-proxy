@@ -1,18 +1,19 @@
-const restify = require("restify");
+const express = require("express");
+const bodyParser = require("body-parser");
 const srcds = require("srcds-info");
 const package = require("../package.json");
 
-const server = restify.createServer({
-    name: package.name,
-    version: package.version
-});
+const app = express();
+app.use(bodyParser.urlencoded({ extended: false }));  
+app.use(bodyParser.json());
 
+// utility function to ask scrds-info for server query info
 function getStatus(address, port = 27015) {
     return new Promise((resolve, reject) => {
         const client = srcds(address, port);
-        client.info((err, info) => {
-            if (err) {
-                reject(err)
+        client.info((error, info) => {
+            if (error) {
+                reject(error)
             }
             resolve(info);
             client.close();
@@ -20,22 +21,33 @@ function getStatus(address, port = 27015) {
     });
 }
 
-server.use(restify.plugins.acceptParser(server.acceptable));
-server.use(restify.plugins.queryParser());
-server.use(restify.plugins.bodyParser());
-
-server.get("/", (req, res, next) => {
+app.get("/", (req, res) => {
     if (!req.query.ip) {
-        res.send(500);
+        res.status(400).send({
+            status: "error",
+            message: "please provide an ip query parameter"
+        });
     }
 
     getStatus(req.query.ip, req.query.port).then((result) => {
-        res.send(result);
+        res.status(200).send(result);
+    }, (error) => {
+        res.status(200).send({
+            status: "error",
+            message: error.toString()
+        });
     });
 
-    return next();
 });
 
-server.listen(port = 8080, () => {
-    console.log(`${server.name}@${package.version} listening on port ${port}`);
+app.get("/v", (req, res) => {
+    res.send({
+        name: package.name,
+        version: package.version,
+        author: package.author
+    });
+});
+
+let server = app.listen(port = 8080, () => {  
+    console.log(`${package.name}@${package.version} listening on port ${port}`);
 });
