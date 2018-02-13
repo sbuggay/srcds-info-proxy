@@ -2,7 +2,7 @@ const restify = require("restify");
 const srcds = require("srcds-info");
 
 const server = restify.createServer({
-    name: "rcon-proxy",
+    name: "srcds-info-proxy",
     version: '1.0.0'
 });
 
@@ -31,7 +31,7 @@ server.get("/", (req, res, next) => {
     getStatus(req.query.ip, req.query.port).then((result) => {
         res.send(result);
     });
-    
+
     return next();
 });
 

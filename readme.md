@@ -1,4 +1,24 @@
+#srcds-info-proxy
 
+srcds-info-proxy is a server to proxy [A2S_INFO](https://developer.valvesoftware.com/wiki/Server_queries#A2S_INFO) server queries through a REST endpoint.
+
+Install dependencies
+
+```
+npm i
+```
+
+Run
+
+```
+npm run server
+```
+
+Now you can make a request to like this:
+
+`localhost:8080/?ip=192.168.1.3&port=27015`
+
+If the provided ip and port are a valid RCON supported server, you should get back a response like this:
 
 ```
 type	"I"
