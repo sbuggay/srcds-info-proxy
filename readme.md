@@ -11,14 +11,14 @@ npm i
 Run
 
 ```
-npm run server
+npm start
 ```
 
-Now you can make a request to like this:
+Now you can make a request like this:
 
 `localhost:8080/?ip=192.168.1.3&port=27015`
 
-If the provided ip and port are a valid RCON supported server, you should get back a response like this:
+If the provided ip and port is a valid RCON supported server, you should get back a response like this:
 
 key | value
 --- | ---

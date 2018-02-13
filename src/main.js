@@ -1,9 +1,10 @@
 const restify = require("restify");
 const srcds = require("srcds-info");
+const package = require("../package.json");
 
 const server = restify.createServer({
-    name: "srcds-info-proxy",
-    version: '1.0.0'
+    name: package.name,
+    version: package.version
 });
 
 function getStatus(address, port = 27015) {
@@ -35,6 +36,6 @@ server.get("/", (req, res, next) => {
     return next();
 });
 
-server.listen(8080, () => {
-    console.log("%s listening at %s", server.name, server.url);
+server.listen(port = 8080, () => {
+    console.log(`${server.name}@${package.version} listening on port ${port}`);
 });
