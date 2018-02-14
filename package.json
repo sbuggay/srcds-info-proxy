@@ -3,6 +3,7 @@
   "version": "0.1.2",
   "description": "",
   "main": "index.js",
+  "bin": "./bin/start",
   "scripts": {
     "start": "node src/main.js",
     "test": "echo \"Error: no test specified\" && exit 1"

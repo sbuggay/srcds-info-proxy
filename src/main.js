@@ -66,7 +66,11 @@ app.get("/v", (req, res) => {
     });
 });
 
-// start the server
-const server = app.listen(port = 8080, () => {
-    console.log(`${package.name}@${package.version} listening on port ${port}`);
-});
+function start() {
+    // start the server
+    const server = app.listen(port = 8080, () => {
+        console.log(`${package.name}@${package.version} listening on port ${port}`);
+    });
+}
+
+module.exports = start;
