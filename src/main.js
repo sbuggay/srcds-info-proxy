@@ -5,7 +5,7 @@ const package = require("../package.json");
 
 // set up the express app
 const app = express();
-app.use(bodyParser.urlencoded({ extended: false }));  
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // utility function to ask scrds-info for server query info
@@ -28,6 +28,12 @@ function getStatus(address, port = 27015) {
     });
 }
 
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
 //info endpoint
 app.get("/", (req, res) => {
 
@@ -41,7 +47,7 @@ app.get("/", (req, res) => {
 
     // if we get here just assume default port
     getStatus(req.query.ip, req.query.port).then((result) => {
-        res.status(200).send(result);``
+        res.status(200).send(result);
     }, (error) => {
         res.status(200).send({
             status: "error",
@@ -61,6 +67,6 @@ app.get("/v", (req, res) => {
 });
 
 // start the server
-const server = app.listen(port = 8080, () => {  
+const server = app.listen(port = 8080, () => {
     console.log(`${package.name}@${package.version} listening on port ${port}`);
 });
