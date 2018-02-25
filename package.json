@@ -5,7 +5,7 @@
   "main": "index.js",
   "bin": "./bin/start",
   "scripts": {
-    "start": "node src/main.js",
+    "start": "node ./bin/start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -13,6 +13,7 @@
   "dependencies": {
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
+    "letsencrypt-express": "^2.0.6",
     "srcds-info": "^0.1.1"
   }
 }
