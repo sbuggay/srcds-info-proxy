@@ -4,6 +4,10 @@
 
 srcds-info-proxy is a server to proxy [A2S_INFO](https://developer.valvesoftware.com/wiki/Server_queries#A2S_INFO) server queries through a REST endpoint.
 
+srcds-info-proxy can be used as a way to provide game server information on your websites without having to use something like GameTracker. Below is a picture of me using it on my personal site.
+
+![srcds-info-proxy](https://github.com/sbuggay/srcds-info-proxy/blob/master/demo/demo.png?raw=true)
+
 Install dependencies
 
 ```
