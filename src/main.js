@@ -1,8 +1,14 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const srcds = require("srcds-info");
+const http = require("http");
 const https = require("https");
+const fs = require("fs");
+
 const package = require("../package.json");
+
+const http_port = 8040;
+const https_port = 8080;
 
 // set up the express app
 const app = express();
@@ -59,8 +65,8 @@ app.get("/", (req, res) => {
 });
 
 var https_options = {
-    key: P_KEY || "",
-    cert: process.env.P_CERT || ""
+    key: process.env.P_KEY ? fs.readFileSync(process.env.P_KEY) : null,
+    cert: process.env.P_CERT ? fs.readFileSync(process.env.P_CERT) : null,
 };
 
 // version endpoint
@@ -73,12 +79,15 @@ app.get("/v", (req, res) => {
 });
 
 function start() {
+    // Start http server
+    http.createServer(app).listen(http_port, () => {
+        console.log(`http listening on ${http_port}`);
+    });
+
+    // If we have the key and cert, start the https server
     if (https_options.key && https_options.cert) {
-        const server = https.createServer(https_options, app).listen(port = 8080, "cocytus.xyz");
-    }
-    else {
-        const server = app.listen(port = 8080, () => {
-            console.log(`${package.name}@${package.version} listening on port ${port}`);
+        https.createServer(https_options, app).listen(https_port, () => {
+            console.log(`https listening on ${https_port}`);
         });
     }
 }
