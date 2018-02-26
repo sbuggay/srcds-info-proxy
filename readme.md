@@ -8,10 +8,12 @@ srcds-info-proxy can be used as a way to provide game server information on your
 
 ![srcds-info-proxy](https://github.com/sbuggay/srcds-info-proxy/blob/master/demo/demo.png?raw=true)
 
+## Setup
+
 Install dependencies
 
 ```
-npm i
+npm install
 ```
 
 Run
@@ -46,3 +48,5 @@ gameVersion | "1.36.2.6"
 ip | "192.168.1.3"
 port | 27015
 pw | false
+
+There is optional HTTPS support. If you provide absolute paths to your cert and key with `P_CERT` AND `P_KEY` env variables, `srcds-info-proxy` will also start an HTTPS server.
