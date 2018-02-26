@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const srcds = require("srcds-info");
+const https = require("https");
 const package = require("../package.json");
 
 // set up the express app
@@ -57,6 +58,11 @@ app.get("/", (req, res) => {
 
 });
 
+var https_options = {
+    key: P_KEY || "",
+    cert: process.env.P_CERT || ""
+};
+
 // version endpoint
 app.get("/v", (req, res) => {
     res.send({
@@ -67,10 +73,14 @@ app.get("/v", (req, res) => {
 });
 
 function start() {
-    // start the server
-    const server = app.listen(port = 8080, () => {
-        console.log(`${package.name}@${package.version} listening on port ${port}`);
-    });
+    if (https_options.key && https_options.cert) {
+        const server = https.createServer(https_options, app).listen(port = 8080, "cocytus.xyz");
+    }
+    else {
+        const server = app.listen(port = 8080, () => {
+            console.log(`${package.name}@${package.version} listening on port ${port}`);
+        });
+    }
 }
 
 module.exports = start;
