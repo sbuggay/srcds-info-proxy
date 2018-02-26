@@ -4,6 +4,7 @@ const srcds = require("srcds-info");
 const http = require("http");
 const https = require("https");
 const fs = require("fs");
+const cors = require("cors");
 
 const package = require("../package.json");
 
@@ -35,11 +36,7 @@ function getStatus(address, port = 27015) {
     });
 }
 
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
-});
+app.use(cors());
 
 //info endpoint
 app.get("/", (req, res) => {
