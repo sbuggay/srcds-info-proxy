@@ -47,6 +47,7 @@ app.get("/", (req, res) => {
             status: "error",
             message: "please provide an ip query parameter"
         });
+        return;
     }
 
     // if we get here just assume default port
@@ -73,6 +74,21 @@ app.get("/v", (req, res) => {
         version: package.version,
         author: package.author
     });
+});
+
+// servers endpoint
+app.get("/servers", (req, res) => {
+    if (!fs.existsSync("./servers.txt")) {
+        res.status(200).send({
+            status: "error",
+            message: "no servers.txt found"
+        })
+    }
+    else {
+        const data = fs.readFileSync("./servers.txt").toString();
+        const servers = data.split(/\r?\n/)
+        res.status(200).send(servers);
+    }
 });
 
 function start() {

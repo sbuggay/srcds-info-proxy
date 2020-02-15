@@ -26,7 +26,7 @@ Now you can make a request like this:
 
 `localhost:8080/?ip=192.168.1.3&port=27015`
 
-If the provided ip:port is a valid RCON supported server, you should get back a response like this:
+If the provided ip:port is a valid RCON supported server, you should get back a JSON response like this:
 
 key | value
 --- | ---
@@ -50,3 +50,19 @@ port | 27015
 pw | false
 
 There is optional HTTPS support. If you provide absolute paths to your cert and key with `P_CERT` AND `P_KEY` env variables, `srcds-info-proxy` will also start an HTTPS server.
+
+## servers.txt
+
+There is support for a `servers.txt` file where you can put all the servers you manage in a newline seperate text file:
+
+```
+192.168.1.1:27015
+10.0.0.1:27015
+1.1.1.1:27020
+```
+
+You can then access this information through `/servers`.
+
+```
+["192.168.1.1:27015","10.0.0.1:27015","1.1.1.1:27020"]
+```
