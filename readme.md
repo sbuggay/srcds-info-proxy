@@ -22,6 +22,8 @@ Run
 npm start
 ```
 
+## get a server status
+
 Now you can make a request like this:
 
 `localhost:8080/?ip=192.168.1.3&port=27015`
@@ -66,3 +68,12 @@ You can then access this information through `/servers`.
 ```
 ["192.168.1.1:27015","10.0.0.1:27015","1.1.1.1:27020"]
 ```
+
+### servers.txt statuses (statusall)
+
+If you're using a `servers.txt` file, you can make a request like this:
+
+`localhost:8080/statusall`
+
+If the `servers.txt` has valid RCON addresses, it will return an array of objects exact same as `get a server status` section,
+of all servers described on it.
