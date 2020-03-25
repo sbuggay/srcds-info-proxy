@@ -91,6 +91,31 @@ app.get("/servers", (req, res) => {
     }
 });
 
+app.get("/statusall", (req, res) => {
+    if (!fs.existsSync("./servers.txt")) {
+        res.status(200).send({
+            status: "error",
+            message: "no servers.txt found"
+        })
+    }
+    else {
+        const data = fs.readFileSync("./servers.txt").toString();
+        const servers = data.split(/\r?\n/)
+
+        Promise.all(servers.map(server => {
+            let parts = server.split(/\:/)
+            return getStatus(parts[0], parts[1])
+        })).then(allServersResult => {
+            res.status(200).send(allServersResult);
+        }, (error) => {
+            res.status(200).send({
+                status: "error",
+                message: error.toString()
+            });
+        });
+    }
+})
+
 function start() {
     // Start http server
     http.createServer(app).listen(http_port, () => {
