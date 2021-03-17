@@ -50,6 +50,15 @@ app.get("/", (req, res) => {
         return;
     }
 
+    if (req.query.port <= 0 || req.query.port >= 65536)
+    {
+        res.status(400).send({
+            status: "error",
+            message: "fuck off rick"
+        });
+        return;
+    }
+
     // if we get here just assume default port
     getStatus(req.query.ip, req.query.port).then((result) => {
         res.status(200).send(result);
