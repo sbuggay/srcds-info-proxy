@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@types/express": "^4.17.11",
-    "typecript": "0.0.1-security"
+    "typecript": "0.0.1-security",
+    "typescript": "^4.2.4"
   }
 }
