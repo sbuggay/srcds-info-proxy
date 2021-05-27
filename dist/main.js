@@ -30,7 +30,7 @@ const node_cache_1 = __importDefault(require("node-cache"));
 const gamedig_1 = __importDefault(require("gamedig"));
 const cors = require("cors");
 const port = process.env.GAMEDIG_PROXY_PORT || 8040;
-const filename = process.env.GAMEDIG_PROXY_SERVERS || "servers.ini";
+const filename = process.env.GAMEDIG_PROXY_SERVERS || "./servers.ini";
 const app = express_1.default();
 app.use(express_1.default.urlencoded({ extended: false }));
 app.use(express_1.default.json());
@@ -39,7 +39,9 @@ const cache = new node_cache_1.default();
 const lastSeenCache = new node_cache_1.default({
     maxKeys: 100
 });
+let servers = null;
 const parseServers = (file) => {
+    console.log(`loading ${file}`);
     try {
         const data = fs_1.default.readFileSync(file).toString();
         if (!data)
@@ -56,6 +58,7 @@ const parseServers = (file) => {
         });
     }
     catch (e) {
+        console.error(e);
         return null;
     }
 };
@@ -103,7 +106,6 @@ app.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield getStatus({ host, port, type });
     res.send(result);
 }));
-let servers = null;
 app.get("/servers", (_, res) => {
     if (!servers)
         return res.status(404).send(`no ${filename} found`);
