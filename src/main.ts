@@ -7,7 +7,7 @@ import gamedig from "gamedig";
 const cors = require("cors");
 
 const port = process.env.GAMEDIG_PROXY_PORT || 8040;
-const filename = process.env.GAMEDIG_PROXY_SERVERS || "servers.ini";
+const filename = process.env.GAMEDIG_PROXY_SERVERS || "./servers.ini";
 
 const app = express();
 app.use(express.urlencoded({ extended: false }));
@@ -24,8 +24,10 @@ const cache = new NodeCache();
 const lastSeenCache = new NodeCache({
     maxKeys: 100
 });
+let servers: IServer[] = null;
 
 const parseServers = (file: string) => {
+    console.log(`loading ${file}`);
     try {
         const data = fs.readFileSync(file).toString();
         
@@ -43,6 +45,7 @@ const parseServers = (file: string) => {
         });
     }
     catch (e) {
+        console.error(e);
         return null;
     }
 }
@@ -108,8 +111,6 @@ app.get("/", async (req, res) => {
     const result = await getStatus({ host, port, type });
     res.send(result);
 });
-
-let servers: IServer[] = null;
 
 app.get("/servers", (_, res) => {
     if (!servers)
