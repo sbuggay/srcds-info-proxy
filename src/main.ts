@@ -43,6 +43,8 @@ const parseServers = async (file: string) => {
         const servers: IServer[] = [];
 
         for await (const line of rl) {
+            if (!line) continue;
+
             const parts = line.split(" ");
             const [host, port] = parts[1]?.split(":");
 
@@ -158,17 +160,20 @@ const INTERVAL = 15000; //update every 15 seconds
 async function start() {
 
     servers = await parseServers(filename);
-    
+
     if (servers) {
-        
+
         fs.watch(filename, {}, async () => {
             console.log(`${filename} changed`);
             servers = await parseServers(filename);
         });
 
-        const buildCache = () => servers.forEach((server) => {
-            getStatus(server, true);
-        });
+        const buildCache = () => {
+            if (!servers) return;
+            servers.forEach((server) => {
+                getStatus(server, true);
+            });
+        }
 
         buildCache();
         setInterval(() => buildCache(), INTERVAL);

@@ -83,6 +83,8 @@ const parseServers = (file) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             for (var rl_1 = __asyncValues(rl), rl_1_1; rl_1_1 = yield rl_1.next(), !rl_1_1.done;) {
                 const line = rl_1_1.value;
+                if (!line)
+                    continue;
                 const parts = line.split(" ");
                 const [host, port] = (_b = parts[1]) === null || _b === void 0 ? void 0 : _b.split(":");
                 servers.push({
@@ -179,9 +181,13 @@ function start() {
                 console.log(`${filename} changed`);
                 servers = yield parseServers(filename);
             }));
-            const buildCache = () => servers.forEach((server) => {
-                getStatus(server, true);
-            });
+            const buildCache = () => {
+                if (!servers)
+                    return;
+                servers.forEach((server) => {
+                    getStatus(server, true);
+                });
+            };
             buildCache();
             setInterval(() => buildCache(), INTERVAL);
         }
