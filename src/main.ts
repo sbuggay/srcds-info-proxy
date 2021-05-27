@@ -3,6 +3,7 @@ import http from "http";
 import fs from "fs";
 import NodeCache from "node-cache";
 import gamedig from "gamedig";
+import * as readline from "readline";
 
 const cors = require("cors");
 
@@ -26,23 +27,33 @@ const lastSeenCache = new NodeCache({
 });
 let servers: IServer[] = null;
 
-const parseServers = (file: string) => {
+const parseServers = async (file: string) => {
     console.log(`loading ${file}`);
-    try {
-        const data = fs.readFileSync(file).toString();
-        
-        if (!data) return null; // on file change there is a stage where length is 0
 
-        return fs.readFileSync(file).toString().split(/\r?\n/).map(line => {
+    if (!fs.existsSync(file)) return null;
+
+    try {
+        const fileStream = fs.createReadStream(file);
+
+        const rl = readline.createInterface({
+            input: fileStream,
+            crlfDelay: Infinity
+        });
+
+        const servers: IServer[] = [];
+
+        for await (const line of rl) {
             const parts = line.split(" ");
             const [host, port] = parts[1]?.split(":");
 
-            return {
+            servers.push({
                 type: parts[0] as gamedig.Type,
                 host: host,
                 port: port && parseInt(port)
-            };
-        });
+            });
+        }
+
+        return servers;
     }
     catch (e) {
         console.error(e);
@@ -144,14 +155,15 @@ app.get("/stats", (_, res) => {
 
 const INTERVAL = 15000; //update every 15 seconds 
 
-function start() {
+async function start() {
 
-    servers = parseServers(filename);
-
+    servers = await parseServers(filename);
+    
     if (servers) {
-        fs.watch(filename, {}, () => {
+        
+        fs.watch(filename, {}, async () => {
             console.log(`${filename} changed`);
-            servers = parseServers(filename);
+            servers = await parseServers(filename);
         });
 
         const buildCache = () => servers.forEach((server) => {
