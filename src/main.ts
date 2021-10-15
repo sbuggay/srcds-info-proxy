@@ -70,10 +70,8 @@ async function getStatus(server: IServer, clearCache = false): Promise<Partial<g
     const { host, port, type } = server;
     const key = cacheKey(server);
 
-    if (clearCache) {
-        cache.del(key);
-    }
-    else {
+    if (!clearCache) {
+        // Check if it's in the cache already
         const cacheResponse = cache.get(key);
 
         if (cacheResponse) {
@@ -81,7 +79,7 @@ async function getStatus(server: IServer, clearCache = false): Promise<Partial<g
         }
     }
 
-    return gamedig.query({ host, port, type }).then((state) => {
+    const query = gamedig.query({ host, port, type }).then((state) => {
         const { players, bots, ...stripped } = state; // strip out players & bots, we don't care about them and it screws up node-cache.
 
         const result = {
@@ -89,7 +87,7 @@ async function getStatus(server: IServer, clearCache = false): Promise<Partial<g
             ...stripped
         }
 
-        cache.set(key, result, 60);
+        cache.set(key, result, 120);
         lastSeenCache.set(key, result)
         return result;
     }).catch(() => { // We don't actually care what the error is, from what I've seen it doesn't even seem to be useful to the end user.
@@ -102,9 +100,13 @@ async function getStatus(server: IServer, clearCache = false): Promise<Partial<g
         }
 
         // Otherwise just error.
-        cache.set(key, { error: "error" }, 60);
+        cache.set(key, { error: "error" }, 120);
         return { error: "error" };
     });
+
+    cache.set(key, query, 120);
+
+    return query;
 }
 
 app.get("/", async (req, res) => {
@@ -135,9 +137,11 @@ app.get("/servers", (_, res) => {
 app.get("/auto", async (_, res) => {
     if (!servers)
         return res.status(404).send(`no ${filename} found`);
-
+    console.log("auto")
     const result = await Promise.all(servers.map(async (server) => {
+        const time = Date.now();
         const status = await getStatus(server);
+        console.log(server.host, server.type, Date.now() - time);
         return {
             host: server.host,
             type: server.type,
@@ -155,7 +159,7 @@ app.get("/stats", (_, res) => {
     });
 });
 
-const INTERVAL = 15000; //update every 15 seconds 
+const INTERVAL = 90000; //update every 90 seconds 
 
 async function start() {
 
@@ -170,6 +174,7 @@ async function start() {
 
         const buildCache = () => {
             if (!servers) return;
+            console.log("build cache");
             servers.forEach((server) => {
                 getStatus(server, true);
             });

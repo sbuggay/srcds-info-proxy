@@ -113,19 +113,17 @@ function getStatus(server, clearCache = false) {
     return __awaiter(this, void 0, void 0, function* () {
         const { host, port, type } = server;
         const key = cacheKey(server);
-        if (clearCache) {
-            cache.del(key);
-        }
-        else {
+        if (!clearCache) {
+            // Check if it's in the cache already
             const cacheResponse = cache.get(key);
             if (cacheResponse) {
                 return cacheResponse;
             }
         }
-        return gamedig_1.default.query({ host, port, type }).then((state) => {
+        const query = gamedig_1.default.query({ host, port, type }).then((state) => {
             const { players, bots } = state, stripped = __rest(state, ["players", "bots"]); // strip out players & bots, we don't care about them and it screws up node-cache.
             const result = Object.assign({ lastSeen: Date.now() }, stripped);
-            cache.set(key, result, 60);
+            cache.set(key, result, 120);
             lastSeenCache.set(key, result);
             return result;
         }).catch(() => {
@@ -134,9 +132,11 @@ function getStatus(server, clearCache = false) {
                 return Object.assign({ error: "error" }, lastSeenCache.get(key));
             }
             // Otherwise just error.
-            cache.set(key, { error: "error" }, 60);
+            cache.set(key, { error: "error" }, 120);
             return { error: "error" };
         });
+        cache.set(key, query, 120);
+        return query;
     });
 }
 app.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -160,8 +160,11 @@ app.get("/servers", (_, res) => {
 app.get("/auto", (_, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (!servers)
         return res.status(404).send(`no ${filename} found`);
+    console.log("auto");
     const result = yield Promise.all(servers.map((server) => __awaiter(void 0, void 0, void 0, function* () {
+        const time = Date.now();
         const status = yield getStatus(server);
+        console.log(server.host, server.type, Date.now() - time);
         return Object.assign({ host: server.host, type: server.type }, status);
     })));
     res.send(result);
@@ -172,7 +175,7 @@ app.get("/stats", (_, res) => {
         lastSeenCache: lastSeenCache.stats
     });
 });
-const INTERVAL = 15000; //update every 15 seconds 
+const INTERVAL = 90000; //update every 90 seconds 
 function start() {
     return __awaiter(this, void 0, void 0, function* () {
         servers = yield parseServers(filename);
@@ -184,6 +187,7 @@ function start() {
             const buildCache = () => {
                 if (!servers)
                     return;
+                console.log("build cache");
                 servers.forEach((server) => {
                     getStatus(server, true);
                 });
