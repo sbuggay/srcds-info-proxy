@@ -1,22 +1,22 @@
-import express from "express";
-import http from "http";
-import fs from "fs";
-import NodeCache from "node-cache";
-import gamedig from "gamedig";
-import * as readline from "readline";
+import express from 'express';
+import http from 'http';
+import NodeCache from 'node-cache';
+import { query, Type, QueryResult } from 'gamedig';
+import { watch } from 'fs';
+import { parseServers } from './utils';
 
-const cors = require("cors");
+const cors = require('cors');
 
 const port = process.env.GAMEDIG_PROXY_PORT || 8040;
-const filename = process.env.GAMEDIG_PROXY_SERVERS || "./servers.ini";
+const filename = process.env.GAMEDIG_PROXY_SERVERS || './servers.ini';
 
 const app = express();
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cors());
 
-interface IServer {
-    type: gamedig.Type;
+export interface IServer {
+    type: Type;
     host: string;
     port?: number;
 }
@@ -27,45 +27,9 @@ const lastSeenCache = new NodeCache({
 });
 let servers: IServer[] = null;
 
-const parseServers = async (file: string) => {
-    console.log(`loading ${file}`);
+const cacheKey = (server: IServer) => `${server.type}/${server.host}${server.port ? ':' + server.port : ''}`;
 
-    if (!fs.existsSync(file)) return null;
-
-    try {
-        const fileStream = fs.createReadStream(file);
-
-        const rl = readline.createInterface({
-            input: fileStream,
-            crlfDelay: Infinity
-        });
-
-        const servers: IServer[] = [];
-
-        for await (const line of rl) {
-            if (!line) continue;
-
-            const parts = line.split(" ");
-            const [host, port] = parts[1]?.split(":");
-
-            servers.push({
-                type: parts[0] as gamedig.Type,
-                host: host,
-                port: port && parseInt(port)
-            });
-        }
-
-        return servers;
-    }
-    catch (e) {
-        console.error(e);
-        return null;
-    }
-}
-
-const cacheKey = (server: IServer) => `${server.type}/${server.host}${server.port ? ":" + server.port : ""}`;
-
-async function getStatus(server: IServer, clearCache = false): Promise<Partial<gamedig.QueryResult & { error: any, lastSeen: any }>> {
+async function getStatus(server: IServer, clearCache = false): Promise<Partial<QueryResult & { error: any, lastSeen: any }>> {
 
     const { host, port, type } = server;
     const key = cacheKey(server);
@@ -79,7 +43,7 @@ async function getStatus(server: IServer, clearCache = false): Promise<Partial<g
         }
     }
 
-    const query = gamedig.query({ host, port, type }).then((state) => {
+    const response = query({ host, port, type }).then((state) => {
         const { players, bots, ...stripped } = state; // strip out players & bots, we don't care about them and it screws up node-cache.
 
         const result = {
@@ -94,54 +58,54 @@ async function getStatus(server: IServer, clearCache = false): Promise<Partial<g
         // If there is an error & we know what it was last, just return that with an extra flag.
         if (lastSeenCache.has(key)) {
             return {
-                error: "error",
-                ...lastSeenCache.get(key)
+                error: 'error',
+                ...lastSeenCache.get(key) as IServer
             }
         }
 
         // Otherwise just error.
-        cache.set(key, { error: "error" }, 120);
-        return { error: "error" };
+        cache.set(key, { error: 'error' }, 120);
+        return { error: 'error' };
     });
 
     cache.set(key, query, 120);
 
-    return query;
+    return response;
 }
 
-app.get("/", async (req, res) => {
+app.get('/', async (req, res) => {
     const host = req.query.host as string;
     const port = parseInt(req.query.port as string);
-    const type = req.query.type as gamedig.Type;
+    const type = req.query.type as Type;
 
     if (!host)
-        return res.status(400).send("please provide an ip");
+        return res.status(400).send('please provide an ip');
 
     if (port && isNaN(port) || port <= 0 || port >= 65536)
-        return res.status(400).send("please provide a valid port");
+        return res.status(400).send('please provide a valid port');
 
     if (!type)
-        return res.status(400).send("please provide server type");
+        return res.status(400).send('please provide server type');
 
     const result = await getStatus({ host, port, type });
     res.send(result);
 });
 
-app.get("/servers", (_, res) => {
+app.get('/servers', (_, res) => {
     if (!servers)
         return res.status(404).send(`no ${filename} found`);
 
     res.send(servers);
 });
 
-app.get("/auto", async (_, res) => {
-    if (!servers)
+app.get('/auto', async (_, res) => {
+    if (!servers) {
         return res.status(404).send(`no ${filename} found`);
-    console.log("auto")
+    }
+
     const result = await Promise.all(servers.map(async (server) => {
         const time = Date.now();
         const status = await getStatus(server);
-        console.log(server.host, server.type, Date.now() - time);
         return {
             host: server.host,
             type: server.type,
@@ -152,13 +116,6 @@ app.get("/auto", async (_, res) => {
     res.send(result);
 });
 
-app.get("/stats", (_, res) => {
-    return res.send({
-        cache: cache.stats,
-        lastSeenCache: lastSeenCache.stats
-    });
-});
-
 const INTERVAL = 90000; //update every 90 seconds 
 
 async function start() {
@@ -167,14 +124,14 @@ async function start() {
 
     if (servers) {
 
-        fs.watch(filename, {}, async () => {
+        watch(filename, {}, async () => {
             console.log(`${filename} changed`);
             servers = await parseServers(filename);
         });
 
         const buildCache = () => {
             if (!servers) return;
-            console.log("build cache");
+            console.log('build cache');
             servers.forEach((server) => {
                 getStatus(server, true);
             });
